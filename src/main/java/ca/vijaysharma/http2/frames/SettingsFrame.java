@@ -2,11 +2,12 @@ package ca.vijaysharma.http2.frames;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Map;
+import java.util.*;
 
-import static ca.vijaysharma.http2.frames.Frame.header;
+import static ca.vijaysharma.http2.frames.FrameType.SETTINGS_FRAME;
+import static ca.vijaysharma.http2.frames.FrameUtilities.header;
 
-public class SettingsFrame {
+public record SettingsFrame(Map<Settings, Integer> settings, Collection<Flag> flags) implements Frame {
     public enum Settings {
         //: The byte that signals the SETTINGS_HEADER_TABLE_SIZE setting.
         HEADER_TABLE_SIZE((byte) 0x01),
@@ -34,10 +35,25 @@ public class SettingsFrame {
         Flag(byte value) {
             this.value = value;
         }
-    }
-    private static final byte TYPE = (byte) 0x04;
 
-    public static byte[] bytes(Map<Settings, Integer> settings, Flag...flags) {
+        public static List<Flag> parse(byte flags) {
+            List<Flag> results = new ArrayList<>();
+            for (var flag : values()) {
+                if ((flag.value & flags) != 0) {
+                    results.add(flag);
+                }
+            }
+            return results;
+        }
+    }
+
+    @Override
+    public FrameType type() {
+        return SETTINGS_FRAME;
+    }
+
+    @Override
+    public byte[] bytes() {
         var dataSize = settings.size() * 6; // 2 bytes for key, 4 for value
         var dataBuffer = ByteBuffer.allocate(dataSize)
             .order(ByteOrder.BIG_ENDIAN);
@@ -55,12 +71,40 @@ public class SettingsFrame {
         }
 
         var buffer = ByteBuffer.allocate(9 + dataSize)
-                .order(ByteOrder.BIG_ENDIAN)
-                .put(header(dataSize, TYPE, flag, 0));
+            .order(ByteOrder.BIG_ENDIAN)
+            .put(header(dataSize, type(), flag, 0));
         if (dataSize > 0) {
             buffer.put(data);
         }
 
         return buffer.array();
+    }
+
+    public static class Builder {
+        private Map<Settings, Integer> settings = new HashMap<>();
+        private List<Flag> flags = new ArrayList<>();
+
+        public Builder() {
+            this(new HashMap<>(), new ArrayList<>());
+        }
+
+        public Builder(Map<Settings, Integer> settings, List<Flag> flags) {
+            this.settings = settings;
+            this.flags = flags;
+        }
+
+        public Builder setSettings(Map<Settings, Integer> settings) {
+            this.settings = settings;
+            return this;
+        }
+
+        public Builder setFlags(List<Flag> flags) {
+            this.flags = flags;
+            return this;
+        }
+
+        public SettingsFrame build() {
+            return new SettingsFrame(settings, flags);
+        }
     }
 }

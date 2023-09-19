@@ -13,10 +13,10 @@ class GoAwayFrameTest {
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x26,
             (byte) 0x94, (byte) 0x00, (byte) 0x00, (byte) 0x00,
             (byte) 0x0C, (byte) 0x42, (byte) 0x37
-        }, GoAwayFrame.bytes(
+        }, new GoAwayFrame.Builder(
             9876,
             12,
-            new byte[] { 0x42, 0x37 })
+            new byte[] { 0x42, 0x37 }).build().bytes()
         );
     }
 }

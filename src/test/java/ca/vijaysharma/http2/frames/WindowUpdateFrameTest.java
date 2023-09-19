@@ -11,6 +11,6 @@ class WindowUpdateFrameTest {
             (byte) 0x00, (byte) 0x00, (byte) 0x04, (byte) 0x08,
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x26,
             (byte) 0xD9, (byte) 0x00, (byte) 0x0F, (byte) 0x00, (byte) 0x01
-        }, WindowUpdateFrame.bytes(9945, 983041));
+        }, new WindowUpdateFrame(9945, 983041).bytes());
     }
 }

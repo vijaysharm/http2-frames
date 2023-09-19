@@ -12,9 +12,9 @@ class RstStreamFrameTest {
             (byte) 0x0,(byte) 0x0,(byte) 0x0,(byte) 0x15,
             (byte) 0x27,(byte) 0x0,(byte) 0x0,(byte) 0x0,
             (byte) 0x13
-        }, RstStreamFrame.bytes(
+        }, new RstStreamFrame.Builder(
             5415,
             19
-        ));
+        ).build().bytes());
     }
 }
